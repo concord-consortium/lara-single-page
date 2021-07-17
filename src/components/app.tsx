@@ -15,9 +15,10 @@ import { SinglePageContent } from "./single-page/single-page-content";
 import { WarningBanner } from "./warning-banner";
 import { CompletionPageContent } from "./activity-completion/completion-page-content";
 import { queryValue, queryValueBoolean, setQueryValue } from "../utilities/url-query";
-import { fetchPortalData, IPortalData, firebaseAppName } from "../portal-api";
+import { fetchPortalData, firebaseAppName } from "../portal-api";
+import { IPortalData, IPortalDataUnion } from "../portal-types";
 import { signInWithToken, initializeDB, setPortalData, initializeAnonymousDB,
-         onFirestoreSaveTimeout, onFirestoreSaveAfterTimeout } from "../firebase-db";
+         onFirestoreSaveTimeout, onFirestoreSaveAfterTimeout, getPortalData } from "../firebase-db";
 import { Activity, IEmbeddablePlugin, Sequence } from "../types";
 import { initializeLara, LaraGlobalType } from "../lara-plugin/index";
 import { LaraGlobalContext } from "./lara-global-context";
@@ -35,6 +36,7 @@ import { GlossaryPlugin } from "../components/activity-page/plugins/glossary-plu
 import { IdleDetector } from "../utilities/idle-detector";
 
 import "./app.scss";
+import { initializeAttachmentsManager } from "../utilities/attachments-manager";
 
 const kDefaultActivity = "sample-activity-multiple-layout-types";   // may eventually want to get rid of this
 const kDefaultIncompleteMessage = "Please submit an answer first.";
@@ -170,6 +172,8 @@ export class App extends React.PureComponent<IProps, IState> {
           this.setError("auth", err);
         }
       }
+
+      initializeAttachmentsManager(getPortalData() as IPortalDataUnion);
 
       if (!preview) {
         // Notify user about network issues. Note that in preview mode Firestore network is disabled, so it doesn't
